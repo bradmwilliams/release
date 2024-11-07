@@ -44,6 +44,9 @@ resources:
     requests:
       cpu: 100m
       memory: 200Mi
+test_binary_build_commands: mkdir -p /usr/local/bin && curl -Lfso /usr/local/bin/jq
+  https://github.com/stedolan/jq/releases/download/jq-1.7.1/jq-linux64 && chmod +x
+  /usr/local/bin/jq
 tests:
 - as: unit
   commands: make test-unit
@@ -80,6 +83,17 @@ tests:
           cpu: 100m
     - ref: openshift-e2e-test
     workflow: openshift-e2e-aws
+- as: check-sync-pr-valid
+  commands: |
+    if [ "$(curl -sSL "https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/issues/${PULL_NUMBER}" |jq -e '.labels[] | select(.name=="kind/sync") |.name' | wc -l )" -gt 0 ]; then
+      remote_base_latest_commit=$(git ls-remote --exit-code -q --refs git@github.com:${REPO_OWNER}/${REPO_NAME}.git refs/heads/${PULL_BASE_REF} | cut -f1)
+      if [! $(git merge-base --is-ancestor "${remote_base_latest_commit}" HEAD) ]; then
+        echo "missing commit ${remote_base_latest_commit} from branch ${PULL_HEAD_REF}: branch needs rebase on base branch ${PULL_BASE_REF}";
+        exit 1;
+      fi
+    fi
+  container:
+    from: test-bin
 zz_generated_metadata:
   branch: main
   org: openshift
