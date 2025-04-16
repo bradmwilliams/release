@@ -376,7 +376,6 @@ def _add_osd_rc_deployment(gendoc):
                                         '--github-throttle=250',
                                         '--jira-endpoint=https://issues.redhat.com',
                                         '--jira-bearer-token-file=/etc/jira/api',
-                                        '--verify-jira',
                                         '--plugin-config=/etc/plugins/plugins.yaml',
                                         '--supplemental-plugin-config-dir=/etc/plugins',
                                         '--authentication-message=Pulling these images requires <a href="https://docs.ci.openshift.org/docs/how-tos/use-registries-in-build-farm/">authenticating to the app.ci cluster</a>.',
